@@ -2,9 +2,17 @@
 
 ### WEB 服务器自动备份脚本 （Shell）  
 
-仅在CentOS 7 x64测试通过
+本脚本仅在CentOS 7 x64测试通过
 
-###  参数说明  
+## 使用示例
+
+```bash
+./backup.sh -w /usr/local/nginx/www/baidu.com -h 123.123.123.123 -t /data/backups/baidu.com/ -u bak -p 123456 -U root -P 123456 -n db_baidu
+```
+
+
+
+## 参数说明
 
 ```shell
 #web根目录
@@ -61,8 +69,8 @@ chmod +x backup.sh
 ### 3、添加至定时任务
 
 ```bash
+vi /etc/crontab 
 #每天凌晨两点自动备份，脚本运行路径、日志路径、脚本参数请自行修改
-crontab -e
-    0 2 * * * cd /usr/local/src/backup/ && ./backup.sh xxxx > /usr/local/src/backup/backup-cron.log  2>&1 &
+0 2 * * * root source /etc/profile && /usr/local/src/bak/backup.sh -w /usr/local/nginx/www/baidu.com -h 123.123.123.123 -t /data/backups/baidu.com/ -u bak -p 123456 -U root -P 123456 -n db_baidu > /usr/local/src/backup/backup-cron.log  2>&1 &
 ```
 
