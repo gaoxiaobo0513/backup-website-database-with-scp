@@ -6,8 +6,12 @@
 # **********************************************************
 
 function error_exit {
-  echo "$1" 1>&2
+  print_log $1
   exit 1
+}
+
+function print_log {
+    echo `date '+%F %T'`" - $1" 1>&2
 }
 
 tmp_dir=~/web-bak
@@ -77,14 +81,12 @@ if [ -z "$db_host" ]; then
 fi
 
 if [ ! -d $web_dir ]; then
-  echo '备份目录不存在！' 1>&2
-  exit 1
+  error_exit '备份目录不存在！'
 fi
 
 cd $web_dir
 parent_path=$(dirname "$PWD") 
-project_path=$(cd `dirname $0`; pwd)
-project_name="${project_path##*/}"
+project_name=$(basename "$web_dir")
 sql_file_name=db_${project_name}_`date +%Y%m%d%H%M%S`.tar.gz
 web_file_name=${project_name}_`date +%Y%m%d%H%M%S`.tar.gz
 
@@ -108,12 +110,11 @@ expect -c "
     expect eof" 
 
 if [ $? -ne 0 ]; then
-    echo "[ERROR] 数据库备份文件传输失败" 1>&2
+  print_log "[ERROR] 数据库备份文件传输失败"
 else
-    echo ">>>>数据库备份文件传输成功" 1>&2
+  print_log "数据库备份文件传输成功"
     rm -rf ${tmp_dir}/${sql_file_name} $tmp_dir/$db_database.sql
 fi
-
 
 #网站备份
 tar -C $parent_path  -zcvf ${tmp_dir}/${web_file_name} ${project_name} || error_exit "网站目录打包失败" 
@@ -131,11 +132,10 @@ expect -c "
 expect eof" 
 
 if [ $? -ne 0 ]; then
-    echo "[ERROR] 网站备份文件传输失败" 1>&2
+    print_log "[ERROR] 网站备份文件传输失败"
 else
-    echo "网站备份文件传输成功" 1>&2
+    print_log "网站备份文件传输成功"
     rm -rf ${tmp_dir}/${web_file_name}
 fi
 
-
-echo `date '+%F %T'`" 备份成功"
+print_log "备份成功"
